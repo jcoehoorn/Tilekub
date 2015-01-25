@@ -28,16 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Rummikub.Deck deck1 = new Rummikub.Deck();
-            Rummikub.Deck deck2 = new Rummikub.Deck();
-            Rummikub.Deck deck3 = new Rummikub.Deck();
             this.SetBox = new System.Windows.Forms.GroupBox();
-            this.SetViewer = new Rummikub.TileSetViewer();
             this.RunBox = new System.Windows.Forms.GroupBox();
-            this.RunViewer = new Rummikub.TileSetViewer();
             this.DeckBox = new System.Windows.Forms.GroupBox();
-            this.PlayerDeck = new Rummikub.TileSetViewer();
             this.btnDraw = new System.Windows.Forms.Button();
+            this.PlayerView = new Rummikub.TileSet();
+            this.RunView = new Rummikub.TileSet();
+            this.SetView1 = new Rummikub.TileSet();
+            this.SetView2 = new Rummikub.TileSet();
             this.SetBox.SuspendLayout();
             this.RunBox.SuspendLayout();
             this.DeckBox.SuspendLayout();
@@ -45,70 +43,38 @@
             // 
             // SetBox
             // 
-            this.SetBox.Controls.Add(this.SetViewer);
+            this.SetBox.Controls.Add(this.SetView1);
+            this.SetBox.Controls.Add(this.SetView2);
             this.SetBox.Location = new System.Drawing.Point(8, 0);
             this.SetBox.Name = "SetBox";
-            this.SetBox.Size = new System.Drawing.Size(275, 585);
+            this.SetBox.Size = new System.Drawing.Size(301, 601);
             this.SetBox.TabIndex = 0;
             this.SetBox.TabStop = false;
             this.SetBox.Text = "Sets";
             // 
-            // SetViewer
-            // 
-            this.SetViewer.AllowDrop = true;
-            this.SetViewer.Columns = 0;
-            this.SetViewer.Location = new System.Drawing.Point(7, 20);
-            this.SetViewer.Name = "SetViewer";
-            this.SetViewer.Rows = 0;
-            this.SetViewer.Size = new System.Drawing.Size(200, 100);
-            this.SetViewer.TabIndex = 0;
-            this.SetViewer.Tiles = deck1;
-            // 
             // RunBox
             // 
-            this.RunBox.Controls.Add(this.RunViewer);
-            this.RunBox.Location = new System.Drawing.Point(292, 0);
+            this.RunBox.Controls.Add(this.RunView);
+            this.RunBox.Location = new System.Drawing.Point(317, 0);
             this.RunBox.Name = "RunBox";
-            this.RunBox.Size = new System.Drawing.Size(445, 375);
+            this.RunBox.Size = new System.Drawing.Size(452, 375);
             this.RunBox.TabIndex = 1;
             this.RunBox.TabStop = false;
             this.RunBox.Text = "Runs";
             // 
-            // RunViewer
-            // 
-            this.RunViewer.AllowDrop = true;
-            this.RunViewer.Columns = 0;
-            this.RunViewer.Location = new System.Drawing.Point(7, 20);
-            this.RunViewer.Name = "RunViewer";
-            this.RunViewer.Rows = 0;
-            this.RunViewer.Size = new System.Drawing.Size(200, 100);
-            this.RunViewer.TabIndex = 0;
-            this.RunViewer.Tiles = deck2;
-            // 
             // DeckBox
             // 
-            this.DeckBox.Controls.Add(this.PlayerDeck);
-            this.DeckBox.Location = new System.Drawing.Point(292, 380);
+            this.DeckBox.Controls.Add(this.PlayerView);
+            this.DeckBox.Location = new System.Drawing.Point(317, 380);
             this.DeckBox.Name = "DeckBox";
-            this.DeckBox.Size = new System.Drawing.Size(445, 146);
+            this.DeckBox.Size = new System.Drawing.Size(452, 153);
             this.DeckBox.TabIndex = 2;
             this.DeckBox.TabStop = false;
             this.DeckBox.Text = "Deck";
             // 
-            // PlayerDeck
-            // 
-            this.PlayerDeck.AllowDrop = true;
-            this.PlayerDeck.Columns = 0;
-            this.PlayerDeck.Location = new System.Drawing.Point(3, 11);
-            this.PlayerDeck.Name = "PlayerDeck";
-            this.PlayerDeck.Rows = 0;
-            this.PlayerDeck.Size = new System.Drawing.Size(200, 100);
-            this.PlayerDeck.TabIndex = 0;
-            this.PlayerDeck.Tiles = deck3;
-            // 
             // btnDraw
             // 
-            this.btnDraw.Location = new System.Drawing.Point(441, 535);
+            this.btnDraw.Location = new System.Drawing.Point(506, 539);
             this.btnDraw.Name = "btnDraw";
             this.btnDraw.Size = new System.Drawing.Size(54, 21);
             this.btnDraw.TabIndex = 3;
@@ -116,12 +82,49 @@
             this.btnDraw.UseVisualStyleBackColor = true;
             this.btnDraw.Click += new System.EventHandler(this.btnDraw_Click);
             // 
+            // PlayerView
+            // 
+            this.PlayerView.Location = new System.Drawing.Point(4, 16);
+            this.PlayerView.Margin = new System.Windows.Forms.Padding(0);
+            this.PlayerView.Name = "PlayerView";
+            this.PlayerView.Size = new System.Drawing.Size(442, 132);
+            this.PlayerView.TabIndex = 4;
+            // 
+            // RunView
+            // 
+            this.RunView.Count = 104;
+            this.RunView.Location = new System.Drawing.Point(4, 13);
+            this.RunView.Margin = new System.Windows.Forms.Padding(0);
+            this.RunView.Name = "RunView";
+            this.RunView.Size = new System.Drawing.Size(442, 352);
+            this.RunView.TabIndex = 0;
+            // 
+            // SetView1
+            // 
+            this.SetView1.Columns = 4;
+            this.SetView1.Count = 52;
+            this.SetView1.Location = new System.Drawing.Point(7, 20);
+            this.SetView1.Margin = new System.Windows.Forms.Padding(0);
+            this.SetView1.Name = "SetView1";
+            this.SetView1.Size = new System.Drawing.Size(136, 572);
+            this.SetView1.TabIndex = 0;
+            // 
+            // SetView2
+            // 
+            this.SetView2.Columns = 4;
+            this.SetView2.Count = 52;
+            this.SetView2.Location = new System.Drawing.Point(157, 20);
+            this.SetView2.Margin = new System.Windows.Forms.Padding(0);
+            this.SetView2.Name = "SetView2";
+            this.SetView2.Size = new System.Drawing.Size(136, 572);
+            this.SetView2.TabIndex = 52;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(746, 624);
+            this.ClientSize = new System.Drawing.Size(776, 608);
             this.Controls.Add(this.btnDraw);
             this.Controls.Add(this.DeckBox);
             this.Controls.Add(this.RunBox);
@@ -145,9 +148,10 @@
         private System.Windows.Forms.GroupBox RunBox;
         private System.Windows.Forms.GroupBox DeckBox;
         private System.Windows.Forms.Button btnDraw;
-        private TileSetViewer PlayerDeck;
-        private TileSetViewer SetViewer;
-        private TileSetViewer RunViewer;
+        private TileSet PlayerView;
+        private TileSet RunView;
+        private TileSet SetView1;
+        private TileSet SetView2;
     }
 }
 

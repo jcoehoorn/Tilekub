@@ -1,6 +1,6 @@
 ﻿namespace Rummikub
 {
-    partial class TileSetViewer
+    partial class TileHolder
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,7 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // TileHolder
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Name = "TileHolder";
+            this.ResumeLayout(false);
+
         }
 
         #endregion

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Rummikub
 {
@@ -16,14 +17,7 @@ namespace Rummikub
         {
             InitializeComponent();
 
-            RunViewer.Columns = 13;
-            RunViewer.Rows = 8;
-            SetViewer.Columns = 8;
-            SetViewer.Rows = 13; 
-
-            PlayerDeck.Columns = 13;
-            PlayerDeck.Rows = 3;
-
+            Debug.WriteLine("Ready");
         }
         bool gameReady = false;
 
@@ -61,8 +55,11 @@ namespace Rummikub
                     Draw(i);
                 }
             }
-
-            PlayerDeck.Tiles = Players[0];
+ 
+            foreach (var tile in Players[1])
+            {
+                PlayerView.Add(tile);
+            }
         }
 
         private Tile Draw(int playerIndex)
@@ -75,7 +72,7 @@ namespace Rummikub
 
         private void btnDraw_Click(object sender, EventArgs e)
         {
-            PlayerDeck.AddTile(Draw(0));
+            //PlayerDeck.AddTile(Draw(0));
         }
 
         private void Form1_Shown(object sender, EventArgs e)

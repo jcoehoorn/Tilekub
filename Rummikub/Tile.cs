@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace Rummikub
 {
@@ -22,8 +23,8 @@ namespace Rummikub
 
         public static int TileWidth { get { return 30; } }
         public static int TileHeight { get { return 40; } }
-        public static int SpacingX { get { return 3; } }
-        public static int SpacingY { get { return 3; } }
+        public static int SpacingX { get { return 4; } }
+        public static int SpacingY { get { return 4; } }
 
         public Tile(int Value, Color TileColor)
         {
@@ -91,7 +92,7 @@ namespace Rummikub
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
-            if (Parent is TileSetViewer) //this is needed or the Click event won't fire in the PlayerSelect form
+            if (Parent is TileHolder) //this is needed or the Click event won't fire in the PlayerSelect form
             {
                 DataObject data = new DataObject(Tile.DragDropFormatName, this);
                 DoDragDrop(data, DragDropEffects.Move);
@@ -133,6 +134,12 @@ namespace Rummikub
             }
         }
         #endregion
+
+        protected override void OnDoubleClick(EventArgs e)
+        {
+            base.OnDoubleClick(e);
+            Debug.Write(Value.ToString());
+        }
 
     }
 }
