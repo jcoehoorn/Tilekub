@@ -74,12 +74,6 @@
     <Compile Include="TileSet.Designer.cs">
       <DependentUpon>TileSet.cs</DependentUpon>
     </Compile>
-    <Compile Include="TileViewer.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TileViewer.Designer.cs">
-      <DependentUpon>TileViewer.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

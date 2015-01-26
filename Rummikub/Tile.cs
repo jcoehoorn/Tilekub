@@ -56,6 +56,16 @@ namespace Rummikub
             DrawTile();
         }
 
+        public TileSet ViewPort 
+        {
+            get
+            {
+                var parent = this.Parent as TileHolder;
+                if (parent == null) return null;
+                return parent.Parent as TileSet;
+            }
+        }
+
         private void DrawTile()
         {
             Image background = new Bitmap(this.Width, this.Height);
@@ -127,19 +137,16 @@ namespace Rummikub
                 Tile source = (Tile)e.Data.GetData(Tile.DragDropFormatName);
  
                 if (this == source) return; // nothing to do
-                if (this.Parent != source.Parent) return; //can't swap with tile in different area
+                if (this.ViewPort != source.ViewPort) return; //don't swap with tile in different area
 
-                var viewport = (TileSetViewer)source.Parent;
-                viewport.SwapTiles(this, source);
+                var sourceHolder = source.Parent as TileHolder;
+                var myHolder = this.Parent as TileHolder;
+                if (source == null || myHolder == null) return; //shouldn't happen
+
+                myHolder.Contents = source;
+                sourceHolder.Contents = this;
             }
         }
         #endregion
-
-        protected override void OnDoubleClick(EventArgs e)
-        {
-            base.OnDoubleClick(e);
-            Debug.Write(Value.ToString());
-        }
-
     }
 }
