@@ -20,6 +20,13 @@ namespace Rummikub
             SetSize();
         }
 
+        public TileSet(int Columns, int Count) : this()
+        {
+            _columns = Columns;
+            _count = Count;
+            SetSize();
+        }
+
         public void Add(Tile tile, int x, int y)
         {
             var holder = (TileHolder)Controls[GridToIndex(x,y)];
@@ -51,6 +58,30 @@ namespace Rummikub
         private Point IndexToGrid(int index)
         {
             return new Point(index % Columns, index / Columns);
+        }
+
+        public Tile this[int index]
+        {
+            get
+            {
+                return ((TileHolder)Controls[index]).Contents;
+            }
+            set
+            {
+                ((TileHolder)Controls[index]).Contents = value;
+            }
+        }
+
+        public Tile this[int x, int y]
+        {
+            get
+            {
+                return ((TileHolder)Controls[GridToIndex(x,y)]).Contents;
+            }
+            set
+            {
+                ((TileHolder)Controls[GridToIndex(x,y)]).Contents = value;
+            }
         }
 
         public Tile CheckPosition(int x, int y)

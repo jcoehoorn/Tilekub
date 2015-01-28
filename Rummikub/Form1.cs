@@ -22,12 +22,13 @@ namespace Rummikub
         bool gameReady = false;
 
         private Deck DrawPile = new Deck();
-        private Deck[] Players;
-        private Deck inPlay = new Deck();
+        private TileSet[] Players;
+        private int currentPlayer;
 
         private void ResetGame()
         {
             DrawPile.Clear();
+            DeckBox.Controls.Clear();
             for (int i = 1; i <= 13; i++)
             {
                 for (int j = 0; j <= (int)Color.Black; j++)
@@ -44,35 +45,38 @@ namespace Rummikub
             playerSelect.ShowDialog();
 
             int playerCount = playerSelect.SelectedPlayerCount;
-            Players = new Deck[playerCount];
+            Players = new TileSet[playerCount];
             for (int i = 0; i < playerCount; i++)
-                Players[i] = new Deck();
+            {
+                Players[i] = new TileSet(13, 39);
+                Players[i].Left = 4;
+                Players[i].Top = 16;
+            }
+
 
             for (int i = 0; i < playerCount; i++)
             {
                 for (int j=0; j < 14; j++)
                 {
-                    Draw(i);
+                    Draw(Players[i]);
                 }
             }
- 
-            foreach (var tile in Players[1])
-            {
-                PlayerView.Add(tile);
-            }
+
+            currentPlayer = 0;
+            DeckBox.Controls.Add(Players[currentPlayer]);
         }
 
-        private Tile Draw(int playerIndex)
+        private Tile Draw(TileSet player)
         {
             Tile result = DrawPile[DrawPile.Count - 1];
             DrawPile.Remove(result);
-            Players[playerIndex].Add(result);
+            player.Add(result);
             return result;
         }
 
-        private void btnDraw_Click(object sender, EventArgs e)
+        private void NextPlayer()
         {
-            //PlayerDeck.AddTile(Draw(0));
+
         }
 
         private void Form1_Shown(object sender, EventArgs e)
