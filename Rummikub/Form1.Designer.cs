@@ -32,10 +32,10 @@
             this.RunBox = new System.Windows.Forms.GroupBox();
             this.DeckBox = new System.Windows.Forms.GroupBox();
             this.btnDraw = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.RunView = new Rummikub.TileSet();
             this.SetView1 = new Rummikub.TileSet();
             this.SetView2 = new Rummikub.TileSet();
-            this.button1 = new System.Windows.Forms.Button();
             this.SetBox.SuspendLayout();
             this.RunBox.SuspendLayout();
             this.SuspendLayout();
@@ -80,35 +80,6 @@
             this.btnDraw.UseVisualStyleBackColor = true;
             this.btnDraw.Click += new System.EventHandler(this.btnDraw_Click);
             // 
-            // RunView
-            // 
-            this.RunView.Rows = 8;
-            this.RunView.Location = new System.Drawing.Point(4, 13);
-            this.RunView.Margin = new System.Windows.Forms.Padding(0);
-            this.RunView.Name = "RunView";
-            this.RunView.Size = new System.Drawing.Size(442, 352);
-            this.RunView.TabIndex = 0;
-            // 
-            // SetView1
-            // 
-            this.SetView1.Columns = 4;
-            this.SetView1.Rows = 13;
-            this.SetView1.Location = new System.Drawing.Point(7, 20);
-            this.SetView1.Margin = new System.Windows.Forms.Padding(0);
-            this.SetView1.Name = "SetView1";
-            this.SetView1.Size = new System.Drawing.Size(136, 572);
-            this.SetView1.TabIndex = 0;
-            // 
-            // SetView2
-            // 
-            this.SetView2.Columns = 4;
-            this.SetView2.Rows = 13;
-            this.SetView2.Location = new System.Drawing.Point(157, 20);
-            this.SetView2.Margin = new System.Windows.Forms.Padding(0);
-            this.SetView2.Name = "SetView2";
-            this.SetView2.Size = new System.Drawing.Size(136, 572);
-            this.SetView2.TabIndex = 52;
-            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(446, 539);
@@ -119,12 +90,42 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // RunView
+            // 
+            this.RunView.Location = new System.Drawing.Point(4, 13);
+            this.RunView.Margin = new System.Windows.Forms.Padding(0);
+            this.RunView.Name = "RunView";
+            this.RunView.Rows = 8;
+            this.RunView.Size = new System.Drawing.Size(442, 352);
+            this.RunView.TabIndex = 0;
+            this.RunView.TileDropped += new Rummikub.TileSet.TileDropEventHandler(this.RunView_TileDropped);
+            // 
+            // SetView1
+            // 
+            this.SetView1.Columns = 4;
+            this.SetView1.Location = new System.Drawing.Point(7, 20);
+            this.SetView1.Margin = new System.Windows.Forms.Padding(0);
+            this.SetView1.Name = "SetView1";
+            this.SetView1.Rows = 13;
+            this.SetView1.Size = new System.Drawing.Size(136, 572);
+            this.SetView1.TabIndex = 0;
+            // 
+            // SetView2
+            // 
+            this.SetView2.Columns = 4;
+            this.SetView2.Location = new System.Drawing.Point(157, 20);
+            this.SetView2.Margin = new System.Windows.Forms.Padding(0);
+            this.SetView2.Name = "SetView2";
+            this.SetView2.Rows = 13;
+            this.SetView2.Size = new System.Drawing.Size(136, 572);
+            this.SetView2.TabIndex = 52;
+            // 
             // btnDone
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(776, 608);
+            this.ClientSize = new System.Drawing.Size(773, 608);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnDraw);
             this.Controls.Add(this.DeckBox);

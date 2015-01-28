@@ -57,7 +57,6 @@ namespace Rummikub
                 Players[i].Top = 16;
             }
 
-
             for (int i = 0; i < playerCount; i++)
             {
                 for (int j=0; j < 14; j++)
@@ -96,7 +95,8 @@ namespace Rummikub
         {
             if (!PlayAreaIsValid())
             {
-                return;
+                MessageBox.Show("Invalid tile placement.");
+                return; //cancel
             }
 
             if (CheckWin())
@@ -129,6 +129,69 @@ namespace Rummikub
         {
             Draw(Players[currentPlayer]);
             EndTurn();
+        }
+
+        private void RunView_TileDropped(object sender, TileDropEventArgs args)
+        {
+            if (args.Tile.IsJoker) return; // never handle a joker
+
+            var me = sender as TileSet;
+            if (me == null) return;
+            var target = me.CheckPosition(args.X,args.Y);
+
+            bool handle = false;
+            if ((int)args.Tile.Value != args.X + 1)
+            {   //is the X position right?
+                handle = true;
+                args.X = args.Tile.Value-1;
+                target = me.CheckPosition(args.X, args.Y);
+            }
+            if ((int)args.Tile.TileColor != args.Y / 2)
+            {
+                //is the Y position right?
+
+                /*Two possible cells. Heuristic for deciding:
+                  1. Can it complete a block of three?
+                  1. Can it replace a joker? If so, take the (first/lower) joker
+                  2. Does it fit next to a neighbor? 
+                  4. Is the spot already occupied?
+                  5. Put in the first (lower) spot                     
+                */
+                //for now, just use the lower spot
+                args.Y = ((int)args.Tile.TileColor) * 2;
+
+                handle = true;
+                target = me.CheckPosition(args.X, args.Y);
+            }
+            if (target != null)
+            {
+                //is the spot vacant?
+
+                if (target.IsJoker)
+                {
+                    //keep this spot, but move the Joker to the next available position
+                    Point p = me.IndexToGrid(me.NextVacantPosition(me.GridToIndex(args.X, args.Y)+1));
+                    me.MoveTile(target, p.X, p.Y);
+                }
+                else
+                {
+                    //use the other Y spot
+                    if (args.Y % 2 == 0)
+                        args.Y++;
+                    else
+                        args.Y--;
+                }
+
+                handle = true;
+            }
+            
+            if (handle)
+            {
+                //new x,y coords chosen
+                // any adjustments were already made
+                me.Add(args.Tile, args.X, args.Y);
+                args.Handled = true;
+            }
         }
     }
 }

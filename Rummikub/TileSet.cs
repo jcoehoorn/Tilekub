@@ -27,15 +27,56 @@ namespace Rummikub
             SetSize();
         }
 
-        public void Add(Tile tile, int x, int y)
+        public bool Add(Tile tile, int x, int y)
         {
             var holder = (TileHolder)Controls[GridToIndex(x,y)];
+            if (holder == null || holder.Contents != null) return false;
+ 
             holder.Contents = tile;
+            return true;
         }
-        public void Add(Tile tile)
+        public bool Add(Tile tile)
         {
-            var holder = Controls.OfType<TileHolder>().FirstOrDefault(h => h.Contents == null);
-            holder.Contents = tile;
+            int idx = NextVacantPosition(0);
+            if (idx >= 0)
+            {
+                var holder = Controls[idx] as TileHolder;
+                if (holder != null)
+                {
+                    holder.Contents = tile;
+                    return true;
+                }
+            }
+            return false;
+        }
+        public int NextVacantPosition(int minPosition)
+        {
+            int result;
+            for (result = minPosition; result < Controls.Count;result++)
+            {
+                var holder = Controls[result] as TileHolder;
+                if (holder != null && holder.Contents == null)
+                {
+                    return result;
+                }
+            }
+            //didn't find an empty spot yet... continue at beginning
+            for (result = 0; result < minPosition;result++ )
+            {
+                var holder = Controls[result] as TileHolder;
+                if (holder != null && holder.Contents == null)
+                {
+                    return result;
+                }
+            }
+            // no empty spots
+            return -1;
+        }
+        public void MoveTile(Tile tile, int x, int y)
+        {
+            var holder = Controls.OfType<TileHolder>().FirstOrDefault(h => h.Contents == tile);
+            if (Add(tile, x, y) && holder != null)
+                holder.Contents = null;
         }
 
         public void Remove(Tile tile)
@@ -50,12 +91,12 @@ namespace Rummikub
             }
         }
 
-        private int GridToIndex(int x, int y)
+        public int GridToIndex(int x, int y)
         {
             return x + (y * Columns);
         }
 
-        private Point IndexToGrid(int index)
+        public Point IndexToGrid(int index)
         {
             return new Point(index % Columns, index / Columns);
         }
@@ -133,6 +174,41 @@ namespace Rummikub
             {
                 Controls.Add(new TileHolder());
             }
+        }
+
+        #region "TileDropped Event"
+        public delegate void TileDropEventHandler(object sender, TileDropEventArgs args);
+
+        public event TileDropEventHandler TileDropped;
+
+        public bool RaiseTileDroppedEvent(Tile tile, int x, int y)
+        {
+            var dropped = this.TileDropped;
+            if (dropped != null)
+            {
+                var args = new TileDropEventArgs(tile, x, y);
+                dropped(this, args);
+                return args.Handled;
+            }
+            return false;
+        }
+        #endregion
+
+    }
+
+    public class TileDropEventArgs : EventArgs 
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public Tile Tile;
+        public bool Handled { get; set; }
+
+        public TileDropEventArgs(Tile tile, int x, int y)
+        {
+            this.Tile = tile;
+            this.X = x;
+            this.Y = y;
+            this.Handled = false;
         }
     }
 }

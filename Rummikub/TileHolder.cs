@@ -41,6 +41,37 @@ namespace Rummikub
             } 
        }
 
+        public TileSet ViewPort { get { return Parent as TileSet; } }
+
+        public int ParentIndex()
+        {
+            if (ViewPort != null)
+            {
+                for(int i =0;i<ViewPort.Controls.Count;i++)
+                {
+                    if (ViewPort.Controls[i] == this) return i;
+                }
+            }
+            return -1;
+        }
+
+        public TileHolder LeftNeighbor 
+        {
+            get
+            {
+                if (ViewPort == null) return null;
+                int idx = ParentIndex(); if (idx <= 0 || idx % ViewPort.Columns == 0) return null; return ViewPort.Controls[idx + 1] as TileHolder; 
+            }
+        }
+        public TileHolder RightNeighbor 
+        {
+            get 
+            {
+                if (ViewPort == null) return null;
+                int idx = ParentIndex(); if (idx < 0 || idx % ViewPort.Columns == ViewPort.Columns - 1) return null; return ViewPort.Controls[idx - 1] as TileHolder;
+            }
+        }
+
         #region DragDrop
 
         protected override void OnDragEnter(DragEventArgs e)
@@ -71,11 +102,20 @@ namespace Rummikub
             {
                 Tile source = (Tile)e.Data.GetData(Tile.DragDropFormatName);
                 if (source.Parent == this) return;
-       
+      
                 var original = (TileHolder)source.Parent;
                 original.Contents = null;
 
-                this.Contents = source;
+                //raise parent's OnTileDropped event
+                bool DropHandled = false;
+                int idx = ParentIndex();
+                if (idx >= 0)
+                {
+                    Point p = ViewPort.IndexToGrid(idx);             
+                    DropHandled = ViewPort.RaiseTileDroppedEvent(source, p.X, p.Y);
+                }
+
+                if (!DropHandled) this.Contents = source;
             }
         }
 

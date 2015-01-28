@@ -137,14 +137,28 @@ namespace Rummikub
                 Tile source = (Tile)e.Data.GetData(Tile.DragDropFormatName);
  
                 if (this == source) return; // nothing to do
-                if (this.ViewPort != source.ViewPort) return; //don't swap with tile in different area
-
-                var sourceHolder = source.Parent as TileHolder;
                 var myHolder = this.Parent as TileHolder;
-                if (source == null || myHolder == null) return; //shouldn't happen
+                if (myHolder == null) return;
 
-                myHolder.Contents = source;
-                sourceHolder.Contents = this;
+                //raise parent's OnTileDropped event
+                bool DropHandled = false;
+                int idx = myHolder.ParentIndex();
+                if (idx >= 0)
+                {
+                    Point p = ViewPort.IndexToGrid(idx);
+                    DropHandled = ViewPort.RaiseTileDroppedEvent(source, p.X, p.Y);
+                }
+
+                if (!DropHandled)
+                {
+                    if (this.ViewPort != source.ViewPort) return; //don't swap with tile in different area
+
+                    var sourceHolder = source.Parent as TileHolder;             
+                    if (source == null) return; 
+
+                    myHolder.Contents = source;
+                    sourceHolder.Contents = this;
+                }
             }
         }
         #endregion
