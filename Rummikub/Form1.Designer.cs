@@ -82,7 +82,7 @@
             // 
             // RunView
             // 
-            this.RunView.Count = 104;
+            this.RunView.Rows = 8;
             this.RunView.Location = new System.Drawing.Point(4, 13);
             this.RunView.Margin = new System.Windows.Forms.Padding(0);
             this.RunView.Name = "RunView";
@@ -92,7 +92,7 @@
             // SetView1
             // 
             this.SetView1.Columns = 4;
-            this.SetView1.Count = 52;
+            this.SetView1.Rows = 13;
             this.SetView1.Location = new System.Drawing.Point(7, 20);
             this.SetView1.Margin = new System.Windows.Forms.Padding(0);
             this.SetView1.Name = "SetView1";
@@ -102,7 +102,7 @@
             // SetView2
             // 
             this.SetView2.Columns = 4;
-            this.SetView2.Count = 52;
+            this.SetView2.Rows = 13;
             this.SetView2.Location = new System.Drawing.Point(157, 20);
             this.SetView2.Margin = new System.Windows.Forms.Padding(0);
             this.SetView2.Name = "SetView2";

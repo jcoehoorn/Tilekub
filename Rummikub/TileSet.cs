@@ -23,7 +23,7 @@ namespace Rummikub
         public TileSet(int Columns, int Count) : this()
         {
             _columns = Columns;
-            _count = Count;
+            _rows = Count;
             SetSize();
         }
 
@@ -90,14 +90,14 @@ namespace Rummikub
         }
 
         [Browsable(true)]
-        [DefaultValue(39)]
-        public int Count
+        [DefaultValue(3)]
+        public int Rows
         {
-            get { return _count; }
-            set {  _count = value; SetSize(); }
+            get { return _rows; }
+            set {  _rows = value; SetSize(); }
         
         }
-        private int _count = 39;
+        private int _rows = 39;
 
         [DefaultValue(13)]
         public int Columns 
@@ -113,15 +113,23 @@ namespace Rummikub
         [Browsable(false)]
         public new int Height { get { return base.Height; } private set { base.Height = value; } }
 
+        public int Count { get { return Controls.OfType<TileHolder>().Count(c => c.Contents != null); } }
+
+        public void Clear()
+        {
+            foreach (var c in Controls.OfType<TileHolder>())
+            {
+                c.Contents = null;
+            }
+        }
+
         protected void SetSize()
         {
             Width = Columns * (Tile.SpacingX + Tile.TileWidth);
-            int rows = Count / Columns;
-            if (Count % Columns != 0) rows++;
-            Height = rows * (Tile.SpacingY + Tile.TileHeight);
+            Height = Rows * (Tile.SpacingY + Tile.TileHeight);
 
             Controls.Clear();
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < (Columns * Rows); i++)
             {
                 Controls.Add(new TileHolder());
             }

@@ -29,6 +29,10 @@ namespace Rummikub
         {
             DrawPile.Clear();
             DeckBox.Controls.Clear();
+            SetView1.Clear();
+            SetView2.Clear();
+            RunView.Clear();
+
             for (int i = 1; i <= 13; i++)
             {
                 for (int j = 0; j <= (int)Color.Black; j++)
@@ -48,7 +52,7 @@ namespace Rummikub
             Players = new TileSet[playerCount];
             for (int i = 0; i < playerCount; i++)
             {
-                Players[i] = new TileSet(13, 39);
+                Players[i] = new TileSet(13, 3);
                 Players[i].Left = 4;
                 Players[i].Top = 16;
             }
@@ -74,11 +78,6 @@ namespace Rummikub
             return result;
         }
 
-        private void NextPlayer()
-        {
-
-        }
-
         private void Form1_Shown(object sender, EventArgs e)
         {
             if (!gameReady)
@@ -95,6 +94,17 @@ namespace Rummikub
 
         private void EndTurn()
         {
+            if (!PlayAreaIsValid())
+            {
+                return;
+            }
+
+            if (CheckWin())
+            {
+                MessageBox.Show("You win!");
+                ResetGame();
+            }
+
             currentPlayer++;
             if (currentPlayer >= Players.Length)
                 currentPlayer = 0;
@@ -102,6 +112,17 @@ namespace Rummikub
             SuspendLayout();
             DeckBox.Controls.Clear();
             DeckBox.Controls.Add(Players[currentPlayer]);
+            ResumeLayout();
+        }
+
+        private bool CheckWin()
+        {
+            return Players[currentPlayer].Count == 0;
+        }
+        private bool PlayAreaIsValid()
+        {
+            //NotImplemented!
+            return true;
         }
 
         private void btnDraw_Click(object sender, EventArgs e)
