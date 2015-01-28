@@ -11,9 +11,9 @@ using System.Diagnostics;
 
 namespace Rummikub
 {
-    public partial class Form1 : Form
+    public partial class btnDone : Form
     {
-        public Form1()
+        public btnDone()
         {
             InitializeComponent();
 
@@ -86,6 +86,28 @@ namespace Rummikub
                 ResetGame();
                 gameReady = true;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            EndTurn();
+        }
+
+        private void EndTurn()
+        {
+            currentPlayer++;
+            if (currentPlayer >= Players.Length)
+                currentPlayer = 0;
+
+            SuspendLayout();
+            DeckBox.Controls.Clear();
+            DeckBox.Controls.Add(Players[currentPlayer]);
+        }
+
+        private void btnDraw_Click(object sender, EventArgs e)
+        {
+            Draw(Players[currentPlayer]);
+            EndTurn();
         }
     }
 }
