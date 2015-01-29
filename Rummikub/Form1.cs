@@ -146,19 +146,20 @@ namespace Rummikub
                 args.X = args.Tile.Value-1;
                 target = me.CheckPosition(args.X, args.Y);
             }
-            if ((int)args.Tile.TileColor != args.Y / 2)
+
+            if ((int)args.Tile.TileColor != args.Y / 2) //if they dropped in the space for the correct color, they may have had a reason. Don't "improve" the placement
             {
                 //is the Y position right?
 
-                /*Two possible cells. Heuristic for deciding:
-                  1. Can it complete a block of three?
-                  1. Can it replace a joker? If so, take the (first/lower) joker
-                  2. Does it fit next to a neighbor? 
-                  4. Is the spot already occupied?
-                  5. Put in the first (lower) spot                     
-                */
-                //for now, just use the lower spot
-                args.Y = ((int)args.Tile.TileColor) * 2;
+                int lowerCoord = ((int)args.Tile.TileColor) * 2;
+                int upperCoord = lowerCoord + 1;
+                Tile lowerTarget = me.CheckPosition(args.X, lowerCoord);
+                Tile upperTarget = me.CheckPosition(args.X, upperCoord);
+                //int will be easier than bool, because some of these I'll want to count (sum) occupied tiles
+                int[] lower = me.Controls.OfType<TileHolder>().Skip(me.GridToIndex(0, lowerCoord)).Take(13).Select(c => c.Contents == null ? 0 : 1).ToArray();
+                int[] upper = me.Controls.OfType<TileHolder>().Skip(me.GridToIndex(0, upperCoord)).Take(13).Select(c => c.Contents == null ? 0 : 1).ToArray();
+
+                args.Y = (((int)args.Tile.TileColor) * 2) + TileLayoutHelper.PlaceRun(upper, lower, args.X, upperTarget != null && upperTarget.IsJoker, lowerTarget != null && lowerTarget.IsJoker);
 
                 handle = true;
                 target = me.CheckPosition(args.X, args.Y);

@@ -68,6 +68,7 @@
     <Compile Include="TileHolder.Designer.cs">
       <DependentUpon>TileHolder.cs</DependentUpon>
     </Compile>
+    <Compile Include="TileLayoutEngine.cs" />
     <Compile Include="TileSet.cs">
       <SubType>Component</SubType>
     </Compile>
