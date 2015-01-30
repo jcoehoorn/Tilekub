@@ -8,7 +8,7 @@ namespace Rummikub
 {
     static class TileLayoutHelper
     {
-        //select which row (upper/lower) to use to place a tile in a run
+        //select which row (upper/lower) to use to place a number tile (not a joker) in a run
         // return 1 for upper, 0 for lower
         public static int PlaceRun(int[] upper, int[] lower, int X, bool upperJoker, bool lowerJoker)
         {
@@ -22,48 +22,9 @@ namespace Rummikub
                   6. Put in the first (lower) spot                     
             */
 
-            int result = 0; //0 for lower result, 1 for upper result
-            bool hueristicComplete = false;
-
-            //Can it complete a run of three?
-            for (int i = 0; i < 3; i++)
-            {
-                int start = (X - 3) + i; //start position
-                //if the sum of the next 5 occupied cells is exactly 2, it completes a run
-                if (start < 0) continue;
-                if (lower.Skip(start).Take(5).Sum() == 2)
-                {
-                    hueristicComplete = true;
-                    i = 4;
-                }
-                else if (upper.Skip(start).Take(5).Sum() == 2)
-                {
-                    result = 1;
-                    hueristicComplete = true;
-                    i = 4;
-                }
-            }
-
-            //Can it replace a joker?
-            if (!hueristicComplete)
-            {
-                if (lowerJoker)
-                {
-                    hueristicComplete = true;
-                }
-                else if (upperJoker)
-                {
-                    result = 1;
-                    hueristicComplete = true;
-                }
-            }
-
-            // Is only one spot open?
-            if (!hueristicComplete && lower[X] == 1 ^ upper[X] == 1)
-            {
-                result = upper[X];
-                hueristicComplete = true;
-            }
+            int result = CompletesRunOfThree(upper, lower, X); //0 for lower result, 1 for upper result
+            if (result < 0) result = ReplacesJoker(upperJoker, lowerJoker);
+            if (result < 0) result = OnlyOneSpotOpen(upper[X]==1, lower[X]==1);
 
             // At this point, we know both spots are open (did not replace a joker, not just one spot open, this is not a joker)
             // It will be convenient for processing further rules to assume the spot will be filled
@@ -71,60 +32,78 @@ namespace Rummikub
             upper[X] = 1;
 
             // If there are adjacent tiles in both spots, put in the spot to give the longer run 
-            if (!hueristicComplete)
+            if (result < 0) result = LongerRun(upper, lower, X);
+            if (result < 0) result = ShorterDistanceFromOccupiedTile(upper, lower, X);
+            return 0; //lower by default
+        }
+
+        private static int CompletesRunOfThree(int[] upper, int[] lower, int X)
+        {
+            //Can it complete a run of three?
+            for (int i = 0; i < 3; i++)
             {
-                int lowerTotal = 0, upperTotal = 0;//count my tile
-                int position = X;
-                while (position >= 0 && upper[position] == 1) { upperTotal++; position--; }
-                position = X + 1;
-                while (position < upper.Length && upper[position] == 1) { upperTotal++; position++; }
-                position = X;
-                while (position >= 0 && lower[position] == 1) { lowerTotal++; position--; }
-                position = X + 1;
-                while (position < lower.Length && lower[position] == 1) { lowerTotal++; position++; }
-
-                if (lowerTotal > upperTotal)
-                {
-                    hueristicComplete = true;
-                }
-                else if (upperTotal > lowerTotal)
-                {
-                    hueristicComplete = true;
-                    result = 1;
-                }
+                int start = (X - 3) + i; //start position
+                //if the sum of the next 5 occupied cells is exactly 2, it completes a run
+                if (start < 0) continue;
+                if (lower.Skip(start).Take(5).Sum() == 2) return 0;
+                if (upper.Skip(start).Take(5).Sum() == 2) return 1;
             }
+            return -1;
+        }
 
-            //Put in the cell with the shortest distance to occupied tile
-            if (!hueristicComplete)
-            {
-                int lowerTotalLeft = 0, lowerTotalRight=0, upperTotalLeft = 0, upperTotalRight = 0;
-                int position = X - 1;
-                while (position >= 0 && upper[position] == 0) { upperTotalLeft++; position--; }
-                if (position < 0) upperTotalLeft = 50; //only count if we actually found a tile
-                position = X + 1;
-                while (position < upper.Length && upper[position] == 0) { upperTotalRight++; position++; }
-                if (position >= upper.Length) upperTotalRight = 50;
-                position = X - 1;
-                while (position >= 0 && lower[position] == 0) { lowerTotalLeft++; position--; }
-                if (position < 0) lowerTotalLeft = 50;
-                position = X + 1;
-                while (position < lower.Length && lower[position] == 0) { lowerTotalRight++; position++; }
-                if (position >= lower.Length) lowerTotalRight = 50;
+        private static int ReplacesJoker(bool t1, bool t2)
+        {
+            if (t2) return 0;
+            if (t1) return 1;
+            return -1;
+        }
 
-                if (lowerTotalRight < lowerTotalLeft) lowerTotalLeft = lowerTotalRight;
-                if (upperTotalRight < upperTotalLeft) upperTotalLeft = upperTotalRight;
-                if (lowerTotalLeft < upperTotalLeft)
-                {
-                    hueristicComplete = true;
-                }
-                else if (upperTotalLeft < lowerTotalLeft)
-                {
-                    hueristicComplete = true;
-                    result = 1;
-                }
-            }
-            //lower by default
-            return result;
+        private static int OnlyOneSpotOpen(bool t1, bool t2)
+        {
+            if (t1 && !t2) return 1;
+            if (t2 && !t1) return 0;
+            return -1;
+        }
+
+        private static int LongerRun(int[] upper, int[] lower, int X)
+        {
+            int lowerTotal = 0, upperTotal = 0, position = X;
+
+            while (position >= 0 && upper[position] == 1) { upperTotal++; position--; }
+            position = X + 1;
+            while (position < upper.Length && upper[position] == 1) { upperTotal++; position++; }
+            position = X;
+            while (position >= 0 && lower[position] == 1) { lowerTotal++; position--; }
+            position = X + 1;
+            while (position < lower.Length && lower[position] == 1) { lowerTotal++; position++; }
+
+            if (lowerTotal > upperTotal) return 0;
+            if (upperTotal > lowerTotal) return 1;
+            return -1;
+        }
+
+        private static int ShorterDistanceFromOccupiedTile(int[] upper, int[] lower, int X)
+        {
+            int lowerTotalLeft = 0, lowerTotalRight = 0, upperTotalLeft = 0, upperTotalRight = 0, position = X -1;
+
+            while (position >= 0 && upper[position] == 0) { upperTotalLeft++; position--; }
+            if (position < 0) upperTotalLeft = 50; //only count if we actually found a tile
+            position = X + 1;
+            while (position < upper.Length && upper[position] == 0) { upperTotalRight++; position++; }
+            if (position >= upper.Length) upperTotalRight = 50;
+            position = X - 1;
+            while (position >= 0 && lower[position] == 0) { lowerTotalLeft++; position--; }
+            if (position < 0) lowerTotalLeft = 50;
+            position = X + 1;
+            while (position < lower.Length && lower[position] == 0) { lowerTotalRight++; position++; }
+            if (position >= lower.Length) lowerTotalRight = 50;
+
+            if (lowerTotalRight < lowerTotalLeft) lowerTotalLeft = lowerTotalRight;
+            if (upperTotalRight < upperTotalLeft) upperTotalLeft = upperTotalRight;
+
+            if (lowerTotalLeft < upperTotalLeft) return 0;
+            if (upperTotalLeft < lowerTotalLeft) return 1;
+            return -1;
         }
     }
 }

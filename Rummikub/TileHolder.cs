@@ -55,6 +55,24 @@ namespace Rummikub
             return -1;
         }
 
+        private bool _badTile = false;
+        public bool BadTile
+        {
+            get { return _badTile; }
+            set
+            {
+                if (value)
+                {//too flat. Need something brighter (but not Color.Red!). Maybe create some kind of gradient for a glow effect. For now, this gets the job done, though
+                    BackColor = System.Drawing.Color.Salmon; 
+                }
+                else
+                {
+                    BackColor = System.Drawing.SystemColors.Control;
+                }
+                _badTile = value;
+            }
+        }
+
         public TileHolder LeftNeighbor 
         {
             get
@@ -63,6 +81,7 @@ namespace Rummikub
                 int idx = ParentIndex(); if (idx <= 0 || idx % ViewPort.Columns == 0) return null; return ViewPort.Controls[idx + 1] as TileHolder; 
             }
         }
+
         public TileHolder RightNeighbor 
         {
             get 
