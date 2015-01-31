@@ -6,7 +6,8 @@ using System.Diagnostics;
 
 //MISSING FEATURES/ROADMAP:
 // TaDone 0.1 Mark incomplete groups after each tile placement
-// TODO 0.2 Force no incomplete groups before accepting the "Done" button
+// TaDone 0.2 Force no incomplete groups before accepting the "Done" button
+// TaDone 0.21 Prevent moving tiles to PlayerSpace that did not start the turn in the playerspace
 // TODO 0.3 Automatically Undo any tile placements when clicking Draw Tile
 // TODO 0.4 Enforce meeting meld for each player before the first time the lay down
 // -- all the important game rules are enfoced at this point
@@ -110,6 +111,8 @@ namespace Rummikub
                 return parent.Parent as TileSet;
             }
         }
+
+        public bool CanMoveToPlayerSpace { get; set; }
 
         private void DrawTile()
         {

@@ -56,6 +56,7 @@ namespace Rummikub
                 Players[i].Left = 4;
                 Players[i].Top = 16;
                 Players[i].TileDropped += PlayerView_TileDropped;
+                Players[i].Name = "Player " + i + " Deck";
             }
 
             for (int i = 0; i < playerCount; i++)
@@ -68,6 +69,11 @@ namespace Rummikub
 
             currentPlayer = 0;
             DeckBox.Controls.Add(Players[currentPlayer]);
+
+            foreach (Tile t in Players[currentPlayer].Controls.OfType<TileHolder>().Where(h => h.Contents != null).Select(h => h.Contents))
+            {
+                t.CanMoveToPlayerSpace = true;
+            }
         }
 
         private Tile Draw(TileSet player)
@@ -131,7 +137,8 @@ namespace Rummikub
                     {
                         if (i - runStartPos < 3)
                         {
-                            for (int j = runStartPos; j<i;j++) ((TileHolder)RunView.Controls[j]).BadTile = true;
+                            for (int j = runStartPos; j<i;j++)
+                                ((TileHolder)RunView.Controls[j]).BadTile = true;
                             result = false;
                         }
                         inRun = false;
@@ -148,7 +155,8 @@ namespace Rummikub
                     if (i - runStartPos < 3)
                     {
                         //too short
-                        for (int j = runStartPos; j < i; j++) ((TileHolder)RunView.Controls[j]).BadTile = true;
+                        for (int j = runStartPos; j < i; j++)
+                            ((TileHolder)RunView.Controls[j]).BadTile = true;
                         result = false;
                     }
                     inRun = false;
@@ -163,7 +171,7 @@ namespace Rummikub
             {
                 for (int j=0;j<sets.Length; j++)
                 {
-                    int idx = sets[j].GridToIndex(0, i * 4);
+                    int idx = sets[j].GridToIndex(0, i);
                     var Tiles = sets[j].Controls.OfType<TileHolder>().Skip(idx).Take(4);
                     int sum = Tiles.Select(c => c.Contents == null ? 0 : 1).Sum();
                     if (sum > 0 && sum < 3)
@@ -192,15 +200,31 @@ namespace Rummikub
                 MessageBox.Show("You win!");
                 ResetGame();
             }
+            else
+            {
+                var sets = new TileSet[3] { RunView, SetView1, SetView2 };
+                foreach (TileSet s in sets)
+                {
+                    foreach (Tile t in s.Controls.OfType<TileHolder>().Where(h => h.Contents != null).Select(h => h.Contents))
+                    {
+                        t.CanMoveToPlayerSpace = false;
+                    }
+                }             
 
-            currentPlayer++;
-            if (currentPlayer >= Players.Length)
-                currentPlayer = 0;
+                currentPlayer++;
+                if (currentPlayer >= Players.Length)
+                    currentPlayer = 0;
+            }
 
             SuspendLayout();
             DeckBox.Controls.Clear();
             DeckBox.Controls.Add(Players[currentPlayer]);
             ResumeLayout();
+
+            foreach (Tile t in Players[currentPlayer].Controls.OfType<TileHolder>().Where(h => h.Contents != null).Select(h => h.Contents))
+            {
+                t.CanMoveToPlayerSpace = true;
+            }
         }
 
         private bool CheckWin()
@@ -221,19 +245,17 @@ namespace Rummikub
 
         private void RunView_TileDropped(object sender, TileDropEventArgs args)
         {
-            if (args.Tile.IsJoker) return; // never handle a joker
-
             var me = sender as TileSet;
             if (me == null) return;
             var target = me.CheckPosition(args.X,args.Y);
 
-            if ((int)args.Tile.Value != args.X + 1)
+            if (!args.Tile.IsJoker && (int)args.Tile.Value != args.X + 1)
             {   //is the X position right?
                 args.X = args.Tile.Value-1;
                 target = me.CheckPosition(args.X, args.Y);
             }
 
-            if ((int)args.Tile.TileColor != args.Y / 2) //if they dropped in the space for the correct color, they may have had a reason. Don't "improve" the placement
+            if (!args.Tile.IsJoker && (int)args.Tile.TileColor != args.Y / 2) //if they dropped in the space for the correct color, they may have had a reason. Don't "improve" the placement
             {
                 //is the Y position right?
 
@@ -269,28 +291,28 @@ namespace Rummikub
                 }
             }
 
-            //new x,y coords chosen
-            // any adjustments were already made
-            me.Add(args.Tile, args.X, args.Y);
-            args.Handled = true;
-            PlaySpaceIsValid();
+            var original = (TileHolder)args.Tile.Parent;
+            if (me.Add(args.Tile, args.X, args.Y) && original != args.Tile.Parent)
+            {
+                original.Contents = null;
+                args.Handled = true;
+                PlaySpaceIsValid();
+            }
         }
 
         private void SetView_TileDropped(object sender, TileDropEventArgs args)
         {
-            if (args.Tile.IsJoker) return; // never handle a joker
-
             var me = sender as TileSet;
             var other = (me == SetView1 ? SetView2 : SetView1);
             if (me == null) return;
             var target = me.CheckPosition(args.X, args.Y);
 
-            if ((int)args.Tile.Value != args.Y + 1)
+            if (!args.Tile.IsJoker && (int)args.Tile.Value != args.Y + 1)
             {   //is the Y position right?
                 args.Y = (int)args.Tile.Value-1;
                 target = me.CheckPosition(args.X, args.Y);
             }
-            if ((int)args.Tile.TileColor != args.X) //is the X position right?
+            if (!args.Tile.IsJoker && (int)args.Tile.TileColor != args.X) //is the X position right?
             {
                 args.X = (int)args.Tile.TileColor;
 
@@ -338,15 +360,34 @@ namespace Rummikub
                 }
             }
 
-            me.Add(args.Tile, args.X, args.Y);
-            args.Handled = true;
-            PlaySpaceIsValid();
+            var original = (TileHolder)args.Tile.Parent;
+            if (me.Add(args.Tile, args.X, args.Y) && original != args.Tile.Parent)
+            {
+                original.Contents = null;
+                args.Handled = true;
+                PlaySpaceIsValid();
+            }
         }
 
         private void PlayerView_TileDropped(object sender, TileDropEventArgs args)
         {
-            if (args.Tile.ViewPort != sender)
-              PlaySpaceIsValid();
+            if (!args.Tile.CanMoveToPlayerSpace)
+            {
+                args.Handled = true;
+                return;
+            }
+
+            var original = (TileHolder)args.Tile.Parent;
+            var holder = Players[currentPlayer].Controls[Players[currentPlayer].GridToIndex(args.X, args.Y)] as TileHolder;
+            if (holder != null && holder.Contents == null)
+            {
+                holder.Contents = args.Tile;
+                original.Contents = null;
+                args.Handled = true;
+            }
+
+            if (original != holder)
+                PlaySpaceIsValid();
         }
     }
 }

@@ -36,8 +36,10 @@ namespace Rummikub
                     value.Left = (Tile.SpacingX / 2)-1;
                     value.Top = (Tile.SpacingY / 2) -1;
                     Controls.Add(value);
+                    value.Parent = this;
                 }
-                _tile = value;        
+                _tile = value;
+                
             } 
        }
 
@@ -122,9 +124,6 @@ namespace Rummikub
                 Tile source = (Tile)e.Data.GetData(Tile.DragDropFormatName);
                 if (source.Parent == this) return;
       
-                var original = (TileHolder)source.Parent;
-                original.Contents = null;
-
                 //raise parent's OnTileDropped event
                 bool DropHandled = false;
                 int idx = ParentIndex();
@@ -134,7 +133,12 @@ namespace Rummikub
                     DropHandled = ViewPort.RaiseTileDroppedEvent(source, p.X, p.Y);
                 }
                 //fallback, shouldn't really need this
-                if (!DropHandled) this.Contents = source;
+                if (!DropHandled)
+                {                 
+                    var original = (TileHolder)source.Parent;
+                    this.Contents = source;
+                    original.Contents = null;
+                }
             }
         }
 
