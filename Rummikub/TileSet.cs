@@ -154,6 +154,9 @@ namespace Rummikub
         [Browsable(false)]
         public new int Height { get { return base.Height; } private set { base.Height = value; } }
 
+        /// <summary>
+        /// The number of occupied positions in the View
+        /// </summary>
         public int Count { get { return Controls.OfType<TileHolder>().Count(c => c.Contents != null); } }
 
         public void Clear()

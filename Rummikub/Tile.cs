@@ -4,6 +4,51 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
 
+//MISSING FEATURES/ROADMAP:
+// TaDone 0.1 Mark incomplete groups after each tile placement
+// TODO 0.2 Force no incomplete groups before accepting the "Done" button
+// TODO 0.3 Automatically Undo any tile placements when clicking Draw Tile
+// TODO 0.4 Enforce meeting meld for each player before the first time the lay down
+// -- all the important game rules are enfoced at this point
+// TODO 0.5 Undo back to beginning of turn
+// TODO 0.6 Undo one tile placement (note: make sure incomplete group marks are drawn correctly)
+// TODO 0.7 Enforce 2min time limit to expire turns (rummikub rules)
+// TODO 0.8 Enforce 15s time limit to expire turns if player moves no tiles, increase to normal limit after first tile move
+// TODO 0.9 Add some audio, maybe some animations, cosmetics and bug fixes ahead of full release
+// TODO 1.0 Bug fixes
+
+// -------------------------------
+// Version 2: Network/Web play
+// TODO 1.1 Inital release for web service to support web play -- separate project in the solution
+// TODO 1.2 Intial release to support client connecting to service
+// TODO 1.3 Intial release to support client automatically updating from service
+// TODO 1.4 Support chat
+// TODO 1.5 Add spectators to Chat
+// TODO 1.6 Waiting room: losers are demoted to make room for spectators
+// TODO 1.7 Host web service on Azure
+// TODO 1.8 Support reporting chat offenders
+// TODO 1.9 Bug Fixes /RC1
+// TODO 2.0 Bug Fixes
+
+//-------------------------------
+// Version 3: Web client
+// Straight up port, will jump straight to 3.0 for initial web release
+// TODO 3.0 Port of client code to web site
+// TODO 3.1 Require account (OpenID, Facebook, etc)
+// TODO 3.2 Start tracking stats when signed in
+// TODO 3.3 Unobtrusive/non-interfering ads on the web site
+
+//---------------------------------
+// Version 4.0: Graphics
+// If I get enough ad revenue, I'll hire graphics help
+// This would come out all at once in a 4.0 release with no new features,
+// but it would likely include a 4.0.x series to correct bugs in the release
+
+//---------------------------------
+// Version 5.0: Mobile
+// Clients for iOS, Android, and Windows
+// Probably need to re-work a lot of the user interface
+
 namespace Rummikub
 {
     public enum Color
@@ -149,7 +194,7 @@ namespace Rummikub
                     DropHandled = ViewPort.RaiseTileDroppedEvent(source, p.X, p.Y);
                 }
 
-                if (!DropHandled)
+                if (!DropHandled) 
                 {
                     if (this.ViewPort != source.ViewPort) return; //don't swap with tile in different area
 

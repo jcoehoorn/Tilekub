@@ -133,7 +133,7 @@ namespace Rummikub
                     Point p = ViewPort.IndexToGrid(idx);             
                     DropHandled = ViewPort.RaiseTileDroppedEvent(source, p.X, p.Y);
                 }
-
+                //fallback, shouldn't really need this
                 if (!DropHandled) this.Contents = source;
             }
         }

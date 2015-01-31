@@ -9,15 +9,54 @@ namespace Rummikub
     static class TileLayoutHelper
     {
         //select which row (upper/lower) to use to place a number tile (not a joker) in a run
-        // return 1 for upper, 0 for lower
+        // return 1 for upper, 0 for lower, -1 for no clear choice
+        public static int PlaceSet(int[] left, int[] right, int X, bool leftJoker, bool rightJoker)
+        {
+            /* Heuristic for deciding which SetView:
+ 
+                  1. Can it complete a group of three? 
+                  2. Can it replace a joker? If so, take the (first/left) joker
+                  3. If only one spot is open, take the spot that's open
+             *  --  Past this point I've proven both spots are open (I'm not a joker and not replacing a joker, so it's not full, and there's not just one spot open)
+                  4. Put in the set to get the larger group.
+                  5. Put it in the spot where it was dropped (no choice: return -1)                  
+            */
+
+            int result = CompletesSetOfThree(left, right);
+            if (result == -1) result = ReplacesJoker(leftJoker, rightJoker);
+            if (result == -1) result = OnlyOneSpotOpen(left[X]==1, right[X]==1);
+            if (result == -1) result = SetWithLargerGroup(left, right);
+
+            return result;
+        }
+
+        public static int CompletesSetOfThree(int[] left, int[] right)
+        {
+            if (right.Sum() == 2) return 1;
+            if (left.Sum() == 2) return 0;
+            return -1;
+        }
+
+        public static int SetWithLargerGroup(int[] left, int[] right)
+        {
+            int lSum = left.Sum();
+            int rSum = right.Sum();
+            if (lSum > rSum) return 0;
+            if (rSum > lSum) return 1;
+            return -1;
+        }
+
+        //select which row (upper/lower) to use to place a number tile (not a joker) in a run
+        // return 1 for upper, 0 for lower, -1 for no clear choice
         public static int PlaceRun(int[] upper, int[] lower, int X, bool upperJoker, bool lowerJoker)
         {
             /* Heuristic for deciding which row:
  
-                  1. Can it complete a block of three? (need to know about 3 tiles to left and right to find this out)
+                  1. Can it complete a group of three? 
                   2. Can it replace a joker? If so, take the (first/lower) joker
-                  3. If only spot is open, take the spot that's open
-                  4. If there are adjacent tiles in both spots, put in the spot to give the longer run -- NOT IMPLEMENTED YET.
+                  3. If only one spot is open, take the spot that's open
+             *    -- Past this point I've proven both spots are open (I'm not a joker and not replacing a joker, so it's not full, and there's not just one spot open)
+                  4. If there are adjacent tiles in both spots, put in the spot to give the longer run 
                   5. Put in the cell with the shortest distance to occupied tile
                   6. Put in the first (lower) spot                     
             */
@@ -34,7 +73,7 @@ namespace Rummikub
             // If there are adjacent tiles in both spots, put in the spot to give the longer run 
             if (result < 0) result = LongerRun(upper, lower, X);
             if (result < 0) result = ShorterDistanceFromOccupiedTile(upper, lower, X);
-            return 0; //lower by default
+            return -1;
         }
 
         private static int CompletesRunOfThree(int[] upper, int[] lower, int X)

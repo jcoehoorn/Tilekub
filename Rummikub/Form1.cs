@@ -55,6 +55,7 @@ namespace Rummikub
                 Players[i] = new TileSet(13, 3);
                 Players[i].Left = 4;
                 Players[i].Top = 16;
+                Players[i].TileDropped += PlayerView_TileDropped;
             }
 
             for (int i = 0; i < playerCount; i++)
@@ -91,9 +92,96 @@ namespace Rummikub
             EndTurn();
         }
 
+        protected class TileLocation
+        {
+            public TileLocation(TileSet view, Point coordinates) { View = view; X = coordinates.X; Y = coordinates.Y; }
+            public TileLocation(TileSet view, int x, int y) { View = view; X = x; Y = y; }
+            public TileSet View { get;private set; }
+            public int X { get; private set; }
+            public int Y { get; private set; }
+        }
+
+        private bool PlaySpaceIsValid()
+        {
+            bool result = true;
+            SuspendLayout();
+
+            for (int a = 0; a < RunView.Controls.Count; a++)
+            {
+                ((TileHolder)RunView.Controls[a]).BadTile = false;
+            }
+            for (int a = 0; a < SetView1.Controls.Count; a++)
+            {
+                ((TileHolder)SetView1.Controls[a]).BadTile = false;
+                ((TileHolder)SetView2.Controls[a]).BadTile = false;
+            }
+
+
+            bool inRun = false;
+            int runStartPos=0;
+            int i = 0;
+            while (i < RunView.Controls.Count)
+            {
+                var holder = RunView.Controls[i] as TileHolder;
+                if (holder == null) throw new InvalidOperationException("Somehow a View has a control other than a TileHolder");
+
+                if (i %13==0) //starting new row
+                {
+                    if (inRun) //finish previous run
+                    {
+                        if (i - runStartPos < 3)
+                        {
+                            for (int j = runStartPos; j<i;j++) ((TileHolder)RunView.Controls[j]).BadTile = true;
+                            result = false;
+                        }
+                        inRun = false;
+                    }
+                }
+
+                if (holder.Contents != null && !inRun)
+                {
+                    runStartPos = i;
+                    inRun = true;
+                }
+                else if (holder.Contents == null && inRun)
+                {
+                    if (i - runStartPos < 3)
+                    {
+                        //too short
+                        for (int j = runStartPos; j < i; j++) ((TileHolder)RunView.Controls[j]).BadTile = true;
+                        result = false;
+                    }
+                    inRun = false;
+                }
+                i++;
+            }
+
+
+            //Sets
+            var sets = new TileSet[2] {SetView1, SetView2};
+            for (i = 0; i < 13; i++)
+            {
+                for (int j=0;j<sets.Length; j++)
+                {
+                    int idx = sets[j].GridToIndex(0, i * 4);
+                    var Tiles = sets[j].Controls.OfType<TileHolder>().Skip(idx).Take(4);
+                    int sum = Tiles.Select(c => c.Contents == null ? 0 : 1).Sum();
+                    if (sum > 0 && sum < 3)
+                    {
+                        //highlight the whole row
+                        foreach (TileHolder t in Tiles) { t.BadTile = true; }
+                        result = false;
+                    }
+                }
+            }
+
+            ResumeLayout();
+            return result;
+        }
+
         private void EndTurn()
         {
-            if (!PlayAreaIsValid())
+            if (!PlaySpaceIsValid())
             {
                 MessageBox.Show("Invalid tile placement.");
                 return; //cancel
@@ -119,14 +207,14 @@ namespace Rummikub
         {
             return Players[currentPlayer].Count == 0;
         }
-        private bool PlayAreaIsValid()
-        {
-            //NotImplemented!
-            return true;
-        }
-
+ 
         private void btnDraw_Click(object sender, EventArgs e)
         {
+            if (!PlaySpaceIsValid()) //change later to revert to start of turn state
+            {
+                MessageBox.Show("Invalid tile placement.");
+                return; //cancel
+            }
             Draw(Players[currentPlayer]);
             EndTurn();
         }
@@ -139,10 +227,8 @@ namespace Rummikub
             if (me == null) return;
             var target = me.CheckPosition(args.X,args.Y);
 
-            bool handle = false;
             if ((int)args.Tile.Value != args.X + 1)
             {   //is the X position right?
-                handle = true;
                 args.X = args.Tile.Value-1;
                 target = me.CheckPosition(args.X, args.Y);
             }
@@ -159,15 +245,14 @@ namespace Rummikub
                 int[] lower = me.Controls.OfType<TileHolder>().Skip(me.GridToIndex(0, lowerCoord)).Take(13).Select(c => c.Contents == null ? 0 : 1).ToArray();
                 int[] upper = me.Controls.OfType<TileHolder>().Skip(me.GridToIndex(0, upperCoord)).Take(13).Select(c => c.Contents == null ? 0 : 1).ToArray();
 
-                args.Y = (((int)args.Tile.TileColor) * 2) + TileLayoutHelper.PlaceRun(upper, lower, args.X, upperTarget != null && upperTarget.IsJoker, lowerTarget != null && lowerTarget.IsJoker);
+                int choice = TileLayoutHelper.PlaceRun(upper, lower, args.X, upperTarget != null && upperTarget.IsJoker, lowerTarget != null && lowerTarget.IsJoker);
+                if (choice == -1)  choice = 0; // no clear winner... use 0
 
-                handle = true;
+                args.Y = (((int)args.Tile.TileColor) * 2) + choice;
                 target = me.CheckPosition(args.X, args.Y);
             }
-            if (target != null)
+            if (target != null)//is the spot vacant?
             {
-                //is the spot vacant?
-
                 if (target.IsJoker)
                 {
                     //keep this spot, but move the Joker to the next available position
@@ -182,17 +267,86 @@ namespace Rummikub
                     else
                         args.Y--;
                 }
+            }
 
-                handle = true;
+            //new x,y coords chosen
+            // any adjustments were already made
+            me.Add(args.Tile, args.X, args.Y);
+            args.Handled = true;
+            PlaySpaceIsValid();
+        }
+
+        private void SetView_TileDropped(object sender, TileDropEventArgs args)
+        {
+            if (args.Tile.IsJoker) return; // never handle a joker
+
+            var me = sender as TileSet;
+            var other = (me == SetView1 ? SetView2 : SetView1);
+            if (me == null) return;
+            var target = me.CheckPosition(args.X, args.Y);
+
+            if ((int)args.Tile.Value != args.Y + 1)
+            {   //is the Y position right?
+                args.Y = (int)args.Tile.Value-1;
+                target = me.CheckPosition(args.X, args.Y);
+            }
+            if ((int)args.Tile.TileColor != args.X) //is the X position right?
+            {
+                args.X = (int)args.Tile.TileColor;
+
+                int[] left = SetView1.Controls.OfType<TileHolder>().Skip(SetView1.GridToIndex(0,args.Y)).Take(4).Select(c => c.Contents == null ? 0 : 1).ToArray();
+                int[] right = SetView2.Controls.OfType<TileHolder>().Skip(SetView2.GridToIndex(0,args.Y)).Take(4).Select(c => c.Contents == null ? 0 : 1).ToArray();
+                Tile lTile = SetView1.CheckPosition(args.X, args.Y);
+                Tile rTile = SetView2.CheckPosition(args.X, args.Y);
+                int choice = TileLayoutHelper.PlaceSet(left, right, args.X, lTile != null && lTile.IsJoker, rTile != null && rTile.IsJoker);
+                if (choice >= 0)
+                {
+                    var sets = new TileSet[2] { SetView1, SetView2 };
+                    me = sets[choice];
+                }
+                target = me.CheckPosition(args.X, args.Y);
             }
             
-            if (handle)
+            if (target != null)  //is the spot vacant?
             {
-                //new x,y coords chosen
-                // any adjustments were already made
-                me.Add(args.Tile, args.X, args.Y);
-                args.Handled = true;
+                if (target.IsJoker)
+                {
+                    //keep this spot, but move the Joker to the next available position
+                    Point p = me.IndexToGrid(me.NextVacantPosition(me.GridToIndex(args.X, args.Y) + 1));
+                    me.MoveTile(target, p.X, p.Y);
+                }
+                else
+                {
+                    //use the other TileSet
+                    var otherTile = other.CheckPosition(args.X, args.Y);
+                    if (otherTile != null) //either the other tile is a joker, or the new tile is a joker
+                    {
+                        Point p = other.IndexToGrid(other.NextVacantPosition(other.GridToIndex(args.X, args.Y)));
+
+                        if(otherTile.IsJoker)
+                        {
+                            other.MoveTile(otherTile, p.X, p.Y);
+                        }
+                        else
+                        {   //I'm the joker
+                            me = other;
+                            args.X = p.X;
+                            args.Y= p.Y;
+                        }
+                    }
+                    
+                }
             }
+
+            me.Add(args.Tile, args.X, args.Y);
+            args.Handled = true;
+            PlaySpaceIsValid();
+        }
+
+        private void PlayerView_TileDropped(object sender, TileDropEventArgs args)
+        {
+            if (args.Tile.ViewPort != sender)
+              PlaySpaceIsValid();
         }
     }
 }
